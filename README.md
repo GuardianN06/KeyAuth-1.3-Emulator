@@ -31,7 +31,7 @@ KeyAuth 1.3 adds a new layer of security by signing response messages. Each resp
 
 [libsodium](https://github.com/jedisct1/libsodium) - Grab latest libsodium release dll from their official github.
 
-To enable spoofing with this emulator, the public key in the KeyAuth code must be replaced. The emulator uses a new public key to sign messages.
+To enable spoofing with this emulator, the public key in the KeyAuth code must be replaced. The emulator uses a new Ed25519 key to sign messages.
 
 - **Replacement Public Key**: `2571268f1826934a28a9eaa365c0496ac1e5a08bd23c4df275adf388948fd497`
 
