@@ -1,12 +1,13 @@
-﻿using System.Text;
+using System.Text;
 using System.Net;
 using System.Text.Json;
 using System.Web;
+using Sodium;
 using System.Runtime.InteropServices;
 
 namespace KeyAuthEmu1._3
 {
-    public static class Sodium
+    public static class Sodium2
     {
         [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int sodium_init();
@@ -16,8 +17,6 @@ namespace KeyAuthEmu1._3
 
         [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_sign_ed25519_detached(byte[] sig, out long siglen, byte[] m, long mlen, byte[] sk);
-
-        public const int SIGNATUREBYTES = 64;
     }
 
     class Program
@@ -56,10 +55,7 @@ namespace KeyAuthEmu1._3
 
             string responseBody = "";
 
-            if(Sodium.sodium_init() < 0)
-            {
-                throw new Exception("Failed to start sodium init! maybe missing dll");
-            }
+            SodiumCore.Init();
 
             if (request.HttpMethod == "POST")
             {
@@ -288,20 +284,15 @@ namespace KeyAuthEmu1._3
 
         public static string SignMessage(string message, long epocht)
         {
+            
             string hexPrivateKey = "36ed9c997b89ada0c8fe186cea69f9a1d2dc5dfc171bb2cfecff8344dee999082571268f1826934a28a9eaa365c0496ac1e5a08bd23c4df275adf388948fd497";
             byte[] privateKey = HexStringToByteArray(hexPrivateKey);
 
             message = epocht.ToString() + message;
             byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
+            byte[] signature = new byte[64];
 
-            byte[] signature = new byte[Sodium.SIGNATUREBYTES];
-            long signatureLength;
-
-            int result = Sodium.crypto_sign_ed25519_detached(signature, out signatureLength, messageBytes, messageBytes.Length, privateKey);
-            if (result != 0 || signatureLength != Sodium.SIGNATUREBYTES)
-            {
-                throw new Exception("Failed to sign the message");
-            }
+            PublicKeyAuth.SignDetached(messageBytes, privateKey).CopyTo(signature, 0);
 
             string signatureHex = ByteArrayToHexString(signature);
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -316,7 +307,6 @@ namespace KeyAuthEmu1._3
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();
         }
 
-
         public static byte[] HexStringToByteArray(string hex)
         {
                 int NumberChars = hex.Length;
@@ -325,7 +315,6 @@ namespace KeyAuthEmu1._3
                     bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
                 return bytes;
         }
-
 
         static Dictionary<string, string> ParseFormData(string formData)
         {
