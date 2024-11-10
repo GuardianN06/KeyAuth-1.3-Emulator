@@ -7,18 +7,6 @@ using System.Runtime.InteropServices;
 
 namespace KeyAuthEmu1._3
 {
-    public static class Sodium2
-    {
-        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int sodium_init();
-
-        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int crypto_sign_ed25519_verify_detached(byte[] sig, byte[] m, ulong mlen, byte[] pk);
-
-        [DllImport("libsodium.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int crypto_sign_ed25519_detached(byte[] sig, out long siglen, byte[] m, long mlen, byte[] sk);
-    }
-
     class Program
     {
         static async Task Main(string[] args)
